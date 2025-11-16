@@ -1,0 +1,172 @@
+import java.util.Random;
+import java.util.Scanner;
+import java.util.InputMismatchException;
+
+/**
+ * Implementa um jogo de adivinhação de números.
+ *
+ * O programa gera um número aleatório dentro de um intervalo definido
+ * e o usuário deve adivinhá-lo em um número limitado de tentativas.
+ * O sistema fornece dicas (maior/menor) e valida as entradas do usuário.
+ */
+public class Main {
+
+    // --- Constantes de Configuração do Jogo ---
+
+    /** Número total de tentativas permitidas ao jogador. */
+    private static final int CHANCES_TOTAIS = 5;
+    /** Valor mínimo do número a ser adivinhado (inclusivo). */
+    private static final int NUMERO_MINIMO = 1;
+    /** Valor máximo do número a ser adivinhado (inclusivo). */
+    private static final int NUMERO_MAXIMO = 100;
+    /** Distância para a dica "quente". */
+    private static final int DISTANCIA_QUENTE = 10;
+
+    /**
+     * Ponto de entrada principal da aplicação.
+     * Este método inicializa os recursos necessários (Scanner) e
+     * orquestra o fluxo principal do jogo.
+     *
+     * @param args Argumentos de linha de comando (não utilizados).
+     */
+    public static void main(String[] args) {
+        // Inicializa o Scanner para leitura da entrada do usuário.
+        // O recurso é gerenciado no 'main' e fechado ao final.
+        Scanner scanner = new Scanner(System.in);
+        
+        // Gera o número secreto para a rodada atual.
+        // O cálculo garante que o número esteja entre MINIMO e MAXIMO.
+        int numeroAleatorio = new Random().nextInt(NUMERO_MAXIMO - NUMERO_MINIMO + 1) + NUMERO_MINIMO;
+
+        mostrarIntroducao();
+        
+        // Inicia a lógica principal do jogo
+        iniciarJogo(scanner, numeroAleatorio);
+
+        // Encerra o jogo e libera o recurso do Scanner.
+        System.out.println("Obrigado por jogar!");
+        scanner.close();
+    }
+
+    /**
+     * Exibe as instruções iniciais e regras do jogo no console.
+     */
+    private static void mostrarIntroducao() {
+        System.out.println("--- Jogo da Adivinhação ---");
+        System.out.printf("Tente adivinhar o número que pensei (entre %d e %d).\n", NUMERO_MINIMO, NUMERO_MAXIMO);
+        System.out.printf("Você tem %d chances.\n", CHANCES_TOTAIS);
+    }
+
+    /**
+     * Gerencia o loop principal e a lógica central do jogo.
+     * Controla o número de tentativas e o estado de vitória/derrota.
+     *
+     * @param scanner Instância do Scanner para ler a entrada do usuário.
+     * @param numeroAleatorio O número secreto que o usuário deve adivinhar.
+     */
+    private static void iniciarJogo(Scanner scanner, int numeroAleatorio) {
+        int tentativas = 0;
+        boolean acertou = false;
+
+        // O loop executa enquanto o jogador tiver tentativas restantes
+        while (tentativas < CHANCES_TOTAIS) {
+            System.out.printf("\nChance %d de %d. Digite seu palpite: ", (tentativas + 1), CHANCES_TOTAIS);
+
+            // Solicita e valida o palpite do usuário
+            int palpite = lerPalpiteValido(scanner);
+            
+            // Processa o palpite e verifica se foi correto
+            if (checarPalpite(palpite, numeroAleatorio)) {
+                acertou = true;
+                break; // Encerra o loop em caso de acerto
+            } else {
+                tentativas++; // Incrementa o contador de tentativas em caso de erro
+            }
+        } // Fim do loop 'while'
+
+        // Exibe o resultado final da partida
+        mostrarResultadoFinal(acertou, numeroAleatorio);
+    }
+
+    /**
+     * Lê e valida a entrada do usuário.
+     * O método garante que a entrada seja um número inteiro e
+     * esteja dentro do intervalo de jogo definido (NUMERO_MINIMO, NUMERO_MAXIMO).
+     * Trata exceções de formato (InputMismatchException).
+     *
+     * @param scanner A instância do Scanner ativa.
+     * @return Um número inteiro válido fornecido pelo usuário.
+     */
+    private static int lerPalpiteValido(Scanner scanner) {
+        while (true) { // Loop de validação
+            try {
+                int palpite = scanner.nextInt();
+
+                // Validação 1: Intervalo numérico
+                if (palpite < NUMERO_MINIMO || palpite > NUMERO_MAXIMO) {
+                    System.out.printf("Palpite inválido! Digite um número entre %d e %d.\n", NUMERO_MINIMO, NUMERO_MAXIMO);
+                    System.out.print("Tente de novo: ");
+                    continue; // Reinicia o loop de validação
+                }
+                
+                return palpite; // Retorna apenas se for válido
+
+            } 
+            // Validação 2: Tipo de dado (ex: letras)
+            catch (InputMismatchException e) {
+                System.out.println("Formato inválido! Por favor, digite apenas NÚMEROS.");
+                System.out.print("Tente de novo: ");
+                scanner.next(); // Limpa o buffer do scanner para evitar loop infinito
+            }
+        }
+    }
+
+    /**
+     * Compara o palpite do usuário com o número secreto e fornece feedback.
+     * Informa se o palpite foi correto, maior, menor ou se está "quente" (próximo).
+     *
+     * @param palpite O número fornecido pelo usuário.
+     * @param numeroAleatorio O número secreto do jogo.
+     * @return true se o palpite estiver correto, false caso contrário.
+     */
+    private static boolean checarPalpite(int palpite, int numeroAleatorio) {
+        // 1. Verificação de Acerto
+        if (palpite == numeroAleatorio) {
+            System.out.printf("Parabéns! Você acertou! O número era %d!\n", numeroAleatorio);
+            return true;
+        }
+        
+        // 2. Verificação de Erro (com dicas)
+        if (palpite < numeroAleatorio) {
+            System.out.print("Errado! O número secreto é MAIOR.");
+            // Fornece a dica "quente" se a distância for 10 ou menos
+            if (numeroAleatorio - palpite <= DISTANCIA_QUENTE) {
+                System.out.print(" (Está quente!)");
+            }
+        } else { // palpite > numeroAleatorio
+            System.out.print("Errado! O número secreto é MENOR.");
+            // Fornece a dica "quente"
+            if (palpite - numeroAleatorio <= DISTANCIA_QUENTE) {
+                System.out.print(" (Está quente!)");
+            }
+        }
+        System.out.println(); // Pula uma linha para a próxima chance
+        return false; // Retorna 'false' indicando que o jogador errou
+    }
+
+    /**
+     * Exibe a mensagem de conclusão do jogo.
+     * Informa "GAME OVER" e revela o número secreto caso o jogador
+     * não tenha acertado (indicado pelo parâmetro 'acertou').
+     *
+     * @param acertou boolean indicando se o jogador venceu.
+     * @param numeroAleatorio O número secreto, para revelação em caso de derrota.
+     */
+    private static void mostrarResultadoFinal(boolean acertou, int numeroAleatorio) {
+        if (!acertou) {
+            System.out.println("\n\n--- GAME OVER! ---");
+            System.out.println("Você usou todas as suas chances.");
+            System.out.printf("O número secreto era: %d\n", numeroAleatorio);
+        }
+    }
+}
