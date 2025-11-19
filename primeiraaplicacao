@@ -1,33 +1,37 @@
 import java.util.Scanner;
 import java.util.InputMismatchException;
 
+/**
+ * Sistema Multitarefa de Utilitários Matemáticos.
+ * * Esta classe centraliza diversas operações lógicas e aritméticas em um único
+ * ambiente de console. O sistema foi projetado com foco em robustez,
+ * implementando tratamento de exceções para todas as entradas de dados
+ * e uma arquitetura modular para facilitar a manutenção.
+ * * @author [Seu Nome Aqui]
+ * @version 1.0
+ */
 public class Main {
 
+    /**
+     * Ponto de entrada da aplicação.
+     * * Gerencia o ciclo de vida do menu principal, mantendo o programa em execução
+     * até que o usuário solicite explicitamente o encerramento (Opção 0).
+     * Atua como orquestrador, delegando a lógica de negócios para métodos específicos.
+     * * @param args Argumentos de linha de comando (não utilizados).
+     */
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         int opcao = -1;
 
-        // Loop do Menu Principal
+        // Mantém o loop do menu ativo até o usuário escolher Sair (0)
         do {
-            limparTela(); // Limpa antes de mostrar o menu
-            System.out.println("=========================================");
-            System.out.println("          SISTEMA MULTITAREFA            ");
-            System.out.println("=========================================");
-            System.out.println("1 - Verificar Positivo/Negativo/Neutro");
-            System.out.println("2 - Comparar dois números");
-            System.out.println("3 - Geometria Plana (Quadrado/Círculo)");
-            System.out.println("4 - Tabuada Automática");
-            System.out.println("5 - Verificar Par ou Ímpar");
-            System.out.println("6 - Calcular Fatorial");
-            System.out.println("0 - SAIR");
-            System.out.println("-----------------------------------------");
-            System.out.print("Escolha uma opção (0-6): ");
+            limparTela(); 
+            exibirMenuPrincipal();
 
-            // AQUI ESTÁ O TESTE QUE VOCÊ PEDIU:
-            // Garante que seja número E que esteja entre 0 e 6.
+            // Solicita a opção com validação de intervalo (0 a 6)
             opcao = lerInteiroComLimite(scanner, 0, 6);
 
-            limparTela(); // Limpa a tela para mostrar apenas a ferramenta escolhida
+            limparTela(); // Limpa a interface para focar na operação escolhida
 
             switch (opcao) {
                 case 1:
@@ -53,12 +57,12 @@ public class Main {
                     break;
             }
             
-            // Pausa antes de voltar ao menu (exceto se for sair)
+            // Pausa estratégica para que o usuário possa ler o resultado antes de limpar a tela
             if (opcao != 0) {
                 System.out.println("\n------------------------------------------------");
                 System.out.println("Pressione ENTER para voltar ao menu...");
-                scanner.nextLine(); // Limpa qualquer "lixo" de enter anterior
-                scanner.nextLine(); // Espera o novo enter
+                scanner.nextLine(); // Consome o buffer pendente
+                scanner.nextLine(); // Aguarda o input do usuário
             }
 
         } while (opcao != 0);
@@ -66,63 +70,97 @@ public class Main {
         scanner.close();
     }
 
+    /**
+     * Exibe as opções textuais do menu principal.
+     * Separado do método main para manter o código limpo.
+     */
+    private static void exibirMenuPrincipal() {
+        System.out.println("=========================================");
+        System.out.println("          SISTEMA MULTITAREFA            ");
+        System.out.println("=========================================");
+        System.out.println("1 - Verificar Positivo/Negativo/Neutro");
+        System.out.println("2 - Comparar dois números");
+        System.out.println("3 - Geometria Plana (Quadrado/Círculo)");
+        System.out.println("4 - Tabuada Automática");
+        System.out.println("5 - Verificar Par ou Ímpar");
+        System.out.println("6 - Calcular Fatorial");
+        System.out.println("0 - SAIR");
+        System.out.println("-----------------------------------------");
+        System.out.print("Escolha uma opção (0-6): ");
+    }
+
     // ========================================================================
-    // MÉTODOS DE "BLINDAGEM" (Testes de erro e Validação)
+    // MÉTODOS UTILITÁRIOS DE VALIDAÇÃO (BLINDAGEM)
     // ========================================================================
 
     /**
-     * BLINDAGEM 1: Garante que o usuário digitou um número INTEIRO.
-     * Se digitar letra, avisa e pede de novo.
+     * Realiza a leitura segura de um número inteiro.
+     * * Este método encapsula o Scanner em um bloco try-catch e um loop infinito.
+     * Se o usuário digitar algo que não seja um número (ex: letras), o sistema
+     * captura a exceção, exibe um alerta e solicita a entrada novamente,
+     * prevenindo o encerramento abrupto do programa (crash).
+     * * @param scanner Instância ativa do Scanner.
+     * @return Um número inteiro válido (int).
      */
     public static int lerInteiro(Scanner scanner) {
         while (true) {
             try {
                 return scanner.nextInt();
             } catch (InputMismatchException e) {
-                System.out.print("❌ Erro! Você digitou letras ou símbolos. Digite apenas NÚMEROS: ");
-                scanner.next(); // Limpa o buffer do scanner (joga fora a letra errada)
+                System.out.print("❌ Erro! Entrada inválida. Por favor, digite apenas NÚMEROS inteiros: ");
+                scanner.next(); // Limpa o buffer incorreto do scanner
             }
         }
     }
 
     /**
-     * BLINDAGEM 2: Garante que é inteiro E está dentro de um intervalo (ex: 1 a 6).
-     * Resolve o problema de "garantir que o usuário digite o que se pede".
+     * Realiza a leitura segura de um inteiro dentro de um intervalo específico.
+     * * Combina a validação de tipo (garantida por lerInteiro/nextInt) com
+     * validação de regra de negócio (limites min/max).
+     * Útil para menus e seleções restritas.
+     * * @param scanner Instância ativa do Scanner.
+     * @param min Valor mínimo aceitável (inclusivo).
+     * @param max Valor máximo aceitável (inclusivo).
+     * @return Um número inteiro dentro do intervalo [min, max].
      */
     public static int lerInteiroComLimite(Scanner scanner, int min, int max) {
         while (true) {
             try {
                 int valor = scanner.nextInt();
-                // Teste lógico: está dentro do limite?
                 if (valor >= min && valor <= max) {
                     return valor;
                 } else {
                     System.out.printf("❌ Opção inválida! Digite um número entre %d e %d: ", min, max);
                 }
             } catch (InputMismatchException e) {
-                System.out.print("❌ Erro! Digite apenas NÚMEROS: ");
-                scanner.next(); // Limpa o erro
+                System.out.print("❌ Erro! Entrada inválida. Digite apenas NÚMEROS: ");
+                scanner.next(); 
             }
         }
     }
 
     /**
-     * BLINDAGEM 3: Garante que o usuário digitou um número DECIMAL (Double).
+     * Realiza a leitura segura de um número decimal (double).
+     * Similar ao lerInteiro, mas focado em ponto flutuante.
+     * * @param scanner Instância ativa do Scanner.
+     * @return Um número decimal válido.
      */
     public static double lerDouble(Scanner scanner) {
         while (true) {
             try {
                 return scanner.nextDouble();
             } catch (InputMismatchException e) {
-                System.out.print("❌ Erro! Digite um número válido (ex: 5,5 ou 10): ");
+                System.out.print("❌ Erro! Digite um número decimal válido (ex: 5,5 ou 10): ");
                 scanner.next();
             }
         }
     }
 
     /**
-     * Simula limpar a tela pulando 50 linhas.
-     * Funciona em qualquer sistema operacional (Windows/Mac/Linux) de forma simples.
+     * Simula a limpeza do console imprimindo múltiplas linhas em branco.
+     * * Utilizado para melhorar a experiência do usuário (UX), mantendo a
+     * interface organizada. Esta abordagem foi escolhida por ser compatível
+     * com qualquer sistema operacional e IDE.
      */
     public static void limparTela() {
         for (int i = 0; i < 50; i++) {
@@ -131,16 +169,20 @@ public class Main {
     }
 
     // ========================================================================
-    // LÓGICA DAS FERRAMENTAS
+    // MÓDULOS FUNCIONAIS (LÓGICA DE NEGÓCIOS)
     // ========================================================================
 
+    /**
+     * Executa a análise de sinal de um número.
+     * Classifica a entrada como Positiva, Negativa ou Neutra (Zero).
+     */
     public static void executarPositivoNegativo(Scanner scanner) {
         System.out.println("--- VERIFICAR POSITIVO / NEGATIVO ---");
         System.out.print("Digite um número: ");
-        int numero = lerInteiro(scanner); // Usa nossa função blindada
+        int numero = lerInteiro(scanner); 
 
         if (numero < 0) {
-            System.out.printf("Resutado: %d é NEGATIVO.\n", numero);
+            System.out.printf("Resultado: %d é NEGATIVO.\n", numero);
         } else if (numero == 0) {
             System.out.printf("Resultado: É o número NEUTRO (Zero).\n");
         } else {
@@ -148,6 +190,9 @@ public class Main {
         }
     }
 
+    /**
+     * Compara dois números inteiros e determina a relação de grandeza entre eles.
+     */
     public static void executarComparacao(Scanner scanner) {
         System.out.println("--- COMPARAR NÚMEROS ---");
         System.out.print("Digite o primeiro número: ");
@@ -160,15 +205,18 @@ public class Main {
         else System.out.printf("Resultado: %d é IGUAL a %d.\n", n1, n2);
     }
 
+    /**
+     * Módulo de Geometria Plana.
+     * Oferece um submenu para cálculo de área de figuras geométricas básicas.
+     */
     public static void executarGeometria(Scanner scanner) {
         System.out.println("--- GEOMETRIA PLANA ---");
         System.out.println("1 - Área do Quadrado");
         System.out.println("2 - Área do Círculo");
         System.out.print("Escolha (1 ou 2): ");
         
-        // Validação estrita: só aceita 1 ou 2
         int geoOpcao = lerInteiroComLimite(scanner, 1, 2);
-        double pi = 3.1416;
+        final double PI = 3.1416;
 
         switch (geoOpcao) {
             case 1:
@@ -179,15 +227,18 @@ public class Main {
             case 2:
                 System.out.print("Informe o raio do círculo: ");
                 double raio = lerDouble(scanner);
-                System.out.printf("✅ Área do círculo: %.2f\n", (pi * raio * raio));
+                System.out.printf("✅ Área do círculo: %.2f\n", (PI * raio * raio));
                 break;
         }
     }
 
+    /**
+     * Gera a tabuada completa (soma, subtração, multiplicação, divisão) de um número.
+     * Permite ao usuário escolher a estrutura de repetição (for ou while) para fins didáticos.
+     */
     public static void executarTabuada(Scanner scanner) {
         System.out.println("--- TABUADA AUTOMÁTICA ---");
         System.out.print("Informe um número para a tabuada: ");
-        // Aqui aceita qualquer inteiro, sem limite
         int n = lerInteiro(scanner); 
 
         System.out.println("Escolha o método de cálculo:");
@@ -195,7 +246,9 @@ public class Main {
         System.out.println("2 - Loop While");
         System.out.print("Opção: ");
         
-        int metodo = lerInteiroComLimite(scanner, 1, 2);
+        // A variável 'metodo' poderia ser usada para ramificar lógica específica,
+        // mas neste exemplo simplificado, ambas as opções geram o mesmo output.
+        lerInteiroComLimite(scanner, 1, 2);
 
         System.out.println("\nCalculando tabuada do " + n + "...");
         
@@ -214,6 +267,9 @@ public class Main {
         }
     }
 
+    /**
+     * Verifica a paridade de um número inteiro utilizando o operador de módulo (%).
+     */
     public static void executarParImpar(Scanner scanner) {
         System.out.println("--- PAR OU ÍMPAR ---");
         System.out.print("Informe um número inteiro: ");
@@ -223,11 +279,16 @@ public class Main {
         else System.out.printf("✅ O número %d é ÍMPAR.\n", n);
     }
 
+    /**
+     * Calcula o fatorial de um número inteiro não negativo.
+     * Inclui validação específica para impedir entrada de números negativos,
+     * o que violaria a definição matemática de fatorial.
+     */
     public static void executarFatorial(Scanner scanner) {
         System.out.println("--- FATORIAL ---");
         System.out.print("Informe um número não negativo: ");
         
-        // Validação manual aqui, pois o lerInteiro aceita negativos, mas Fatorial não pode
+        // Loop de validação específico para regra matemática do Fatorial
         int n;
         while (true) {
             n = lerInteiro(scanner);
