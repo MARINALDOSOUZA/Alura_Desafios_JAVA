@@ -7,7 +7,6 @@ import java.util.InputMismatchException;
  * ambiente de console. O sistema foi projetado com foco em robustez,
  * implementando tratamento de exceções para todas as entradas de dados
  * e uma arquitetura modular para facilitar a manutenção.
- * * @author [Seu Nome Aqui]
  * @version 1.0
  */
 public class Main {
